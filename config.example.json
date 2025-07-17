@@ -2,7 +2,7 @@
   "github": {
     "owner": "your-github-username",
     "repo": "your-repo-name",
-    "path": "variables.css",
+    "path": "path/to/your/file.css",
     "branch": "main",
     "token": "YOUR_GITHUB_TOKEN_HERE"
   },

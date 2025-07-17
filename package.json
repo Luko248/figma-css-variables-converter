@@ -5,11 +5,11 @@
   "main": "code.js",
   "scripts": {
     "prebuild": "node build-config.js",
-    "build": "tsc -p tsconfig.json",
-    "clean": "rm -f code.js",
+    "build": "ncc build src/main.ts -o . && mv index.js code.js",
+    "clean": "rm -f code.js && rm -rf dist",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
-    "watch": "npm run build -- --watch",
+    "watch": "npm run prebuild && ncc build src/main.ts -o . --watch",
     "config": "node build-config.js"
   },
   "author": "Lukas Chylik",
@@ -19,6 +19,7 @@
     "@figma/plugin-typings": "*",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
+    "@vercel/ncc": "^0.38.3",
     "eslint": "^8.54.0",
     "typescript": "^5.3.2"
   },

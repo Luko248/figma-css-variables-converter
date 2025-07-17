@@ -5,17 +5,17 @@ const path = require('path');
 const configPath = path.join(__dirname, 'config.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
-// Read the code.ts file
-const codeFilePath = path.join(__dirname, 'code.ts');
-let codeContent = fs.readFileSync(codeFilePath, 'utf8');
+// Read the src/config.ts file
+const configFilePath = path.join(__dirname, 'src', 'config.ts');
+let configContent = fs.readFileSync(configFilePath, 'utf8');
 
 // Replace the placeholder config with actual config
-const configPlaceholder = /const CONFIG: Config = \{[\s\S]*?\};/;
-const newConfig = `const CONFIG: Config = ${JSON.stringify(config, null, 2)};`;
+const configPlaceholder = /export const CONFIG: Config = \{[\s\S]*?\};/;
+const newConfig = `export const CONFIG: Config = ${JSON.stringify(config, null, 2)};`;
 
-codeContent = codeContent.replace(configPlaceholder, newConfig);
+configContent = configContent.replace(configPlaceholder, newConfig);
 
-// Write the updated code.ts
-fs.writeFileSync(codeFilePath, codeContent);
+// Write the updated src/config.ts
+fs.writeFileSync(configFilePath, configContent);
 
-console.log('✅ Config injected successfully into code.ts from config.json');
+console.log('✅ Config injected successfully into src/config.ts from config.json');

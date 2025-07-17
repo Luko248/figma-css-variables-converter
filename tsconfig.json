@@ -1,20 +1,25 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "lib": ["es2017"],
-    "module": "none",
+    "target": "ES2017",
+    "lib": ["ES2017"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "strict": true,
-    "outFile": "./code.js",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@figma"
-    ]
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": false,
+    "sourceMap": false,
+    "removeComments": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
   "include": [
-    "code.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "src/**/*"
+    "build-config.js",
+    "dist"
   ]
 }
