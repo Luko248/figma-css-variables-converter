@@ -93,18 +93,41 @@ The plugin uses a JSON-based configuration system for better security and mainta
 
 ## Build Process
 
-The plugin uses a JSON-based configuration system with TypeScript compilation:
+The plugin uses a modern modular build process with secure configuration injection:
 
-1. **Config Generation**: `npm run prebuild` reads `config.json` and injects it into `code.ts`
-2. **TypeScript Compilation**: Compiles everything into a single `code.js` file
-3. **Single File Output**: No modules or imports - compatible with Figma's environment
+1. **Modular Structure**: Source code is organized in the `src/` directory with separate modules
+2. **Config Injection**: `npm run prebuild` reads `config.json` and injects it into `src/config.ts`
+3. **Bundling**: `npm run build` uses `@vercel/ncc` to bundle all TypeScript modules into a single `code.js` file
+4. **Single File Output**: The build creates a single `code.js` file compatible with Figma's plugin environment
 
-```bash
-npm run build    # Full build with config injection
-npm run config   # Just update config in code.ts
-npm run clean    # Remove generated code.js file
-npm run watch    # Watch mode for development
+### Source Structure
+
 ```
+src/
+├── main.ts              # Main plugin entry point
+├── config.ts            # Configuration (injected from config.json)
+├── types.ts             # Figma API type definitions
+├── utils.ts             # Utility functions (base64, color conversion)
+├── variable-detectors.ts # Variable type detection and naming
+├── css-generator.ts     # CSS generation logic
+└── github-service.ts    # GitHub API integration
+```
+
+### Available Scripts
+
+- `npm run build` - Full build (config injection + bundling)
+- `npm run prebuild` - Only inject config from JSON into TypeScript
+- `npm run config` - Alias for prebuild (config injection only)
+- `npm run clean` - Remove generated `code.js` file and build artifacts
+- `npm run watch` - Watch mode for development with auto-rebuild
+
+### Development Workflow
+
+1. Edit source files in the `src/` directory
+2. Run `npm run build` to bundle everything into `code.js`
+3. Test the plugin in Figma
+4. Use `npm run watch` for continuous development
+5. Use `npm run clean` to remove generated files when needed
 
 ## Development
 

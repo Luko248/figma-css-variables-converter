@@ -24,6 +24,10 @@ build/
 config.json
 .env.production.local
 
+# Generated files
+code.js
+dist/
+
 # IDE/Editor files
 .vscode/
 .idea/

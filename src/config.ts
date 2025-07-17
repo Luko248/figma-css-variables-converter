@@ -20,20 +20,20 @@ export interface Config {
 
 // This will be replaced with actual config during build
 export const CONFIG: Config = {
-  "github": {
-    "owner": "Luko248",
-    "repo": "figma-variables-test",
-    "path": "variables.css",
-    "branch": "main",
-    "token": "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"
+  github: {
+    owner: "Luko248",
+    repo: "figma-variables-test",
+    path: "variables.css",
+    branch: "main",
+    token: "",
   },
-  "api": {
-    "githubBase": "https://api.github.com"
+  api: {
+    githubBase: "https://api.github.com",
   },
-  "plugin": {
-    "name": "Figma Variables to GitHub",
-    "version": "1.0.0"
-  }
+  plugin: {
+    name: "Figma Variables to GitHub",
+    version: "1.0.0",
+  },
 };
 
 export const GITHUB_CONFIG = CONFIG.github;
