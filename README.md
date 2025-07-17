@@ -48,42 +48,63 @@ The plugin uses a modular architecture with the following structure:
 
 ## Configuration
 
-To use this plugin, update the `GITHUB_CONFIG` object in `config.ts`:
+The plugin uses a JSON-based configuration system for better security and maintainability.
 
-```typescript
-export const GITHUB_CONFIG: GitHubConfig = {
-  owner: "your-username",
-  repo: "your-repo-name",
-  path: "variables.css",
-  branch: "main",
-  token: "your-github-token-here",
-};
-```
+### Setup Instructions
 
-## GitHub Token Setup
+1. **Create your config file**: Copy `config.example.json` to `config.json`:
+   ```bash
+   cp config.example.json config.json
+   ```
 
-**Where to add your GitHub API key:**
+2. **GitHub Token**: Create a personal access token at [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+   - Select "Generate new token (classic)"
+   - Give it a descriptive name like "Figma Variables Plugin"
+   - Select the `repo` scope for repository access
+   - Copy the generated token
 
-1. Open `src/config.ts`
-2. Replace `"YOUR_GITHUB_TOKEN_HERE"` with your actual GitHub personal access token
-3. Make sure your token has the following permissions:
-   - `repo` (for private repositories)
-   - `public_repo` (for public repositories)
+3. **Update Configuration**: Edit `config.json` with your settings:
+   ```json
+   {
+     "github": {
+       "owner": "your-github-username",
+       "repo": "your-repository-name",
+       "path": "variables.css",
+       "branch": "main",
+       "token": "your-github-token-here"
+     }
+   }
+   ```
 
-**How to create a GitHub token:**
+### Configuration Structure
 
-1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Click "Generate new token"
-3. Select appropriate scopes (repo access)
-4. Copy the generated token and paste it in the config
+- **`github.owner`**: Your GitHub username or organization
+- **`github.repo`**: Target repository name
+- **`github.path`**: File path where CSS variables will be saved
+- **`github.branch`**: Target branch (usually "main" or "master")
+- **`github.token`**: Your GitHub personal access token
+
+### Security Notes
+
+- ✅ `config.json` is automatically ignored by Git (in `.gitignore`)
+- ✅ Use `config.example.json` as a template for team sharing
+- ✅ Never commit your actual `config.json` with tokens to version control
+- ✅ The build process injects config at compile time, keeping it secure
 
 ## Build Process
 
-The plugin uses TypeScript compilation. The main entry point is `../code.ts` which imports from this modular structure.
+The plugin uses a JSON-based configuration system with TypeScript compilation:
 
-## Security Note
+1. **Config Generation**: `npm run prebuild` reads `config.json` and injects it into `code.ts`
+2. **TypeScript Compilation**: Compiles everything into a single `code.js` file
+3. **Single File Output**: No modules or imports - compatible with Figma's environment
 
-Never commit your GitHub token to version control. The `.gitignore` file is configured to help prevent accidental commits of sensitive data.
+```bash
+npm run build    # Full build with config injection
+npm run config   # Just update config in code.ts
+npm run clean    # Remove generated code.js file
+npm run watch    # Watch mode for development
+```
 
 ## Development
 

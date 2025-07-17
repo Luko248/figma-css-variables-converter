@@ -1,0 +1,16 @@
+{
+  "github": {
+    "owner": "your-github-username",
+    "repo": "your-repo-name",
+    "path": "variables.css",
+    "branch": "main",
+    "token": "YOUR_GITHUB_TOKEN_HERE"
+  },
+  "api": {
+    "githubBase": "https://api.github.com"
+  },
+  "plugin": {
+    "name": "Figma Variables to GitHub",
+    "version": "1.0.0"
+  }
+}
