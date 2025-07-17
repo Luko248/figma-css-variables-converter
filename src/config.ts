@@ -21,10 +21,10 @@ export interface Config {
 // This will be replaced with actual config during build
 export const CONFIG: Config = {
   github: {
-    owner: "Luko248",
-    repo: "figma-variables-test",
-    path: "variables.css",
-    branch: "main",
+    owner: "",
+    repo: "",
+    path: "",
+    branch: "",
     token: "",
   },
   api: {
