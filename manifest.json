@@ -1,0 +1,17 @@
+{
+  "name": "Variable-convertor",
+  "id": "1527312977182873836",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "documentAccess": "dynamic-page",
+  "editorType": [
+    "figma"
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://api.github.com"
+    ]
+  }
+}
