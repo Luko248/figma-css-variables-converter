@@ -20,9 +20,10 @@ export async function checkFileExists(filePath: string): Promise<GitHubFileRespo
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Figma-Variables-Plugin'
+        'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'Figma-Variables-Plugin',
+        'X-GitHub-Api-Version': '2022-11-28'
       }
     });
 
@@ -69,10 +70,11 @@ export async function pushToGitHub(content: string): Promise<GitHubApiResponse> 
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github+json',
         'Content-Type': 'application/json',
-        'User-Agent': 'Figma-Variables-Plugin'
+        'User-Agent': 'Figma-Variables-Plugin',
+        'X-GitHub-Api-Version': '2022-11-28'
       },
       body: JSON.stringify(requestBody)
     });
@@ -83,10 +85,16 @@ export async function pushToGitHub(content: string): Promise<GitHubApiResponse> 
     };
     
     if (!response.ok) {
-      console.error('❌ GitHub API error:', responseData);
+      console.error('❌ GitHub API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        response: responseData,
+        url: url,
+        token: GITHUB_CONFIG.token ? `${GITHUB_CONFIG.token.substring(0, 10)}...` : 'NO TOKEN'
+      });
       return {
         success: false,
-        message: `GitHub API error: ${response.status} - ${responseData.message || 'Unknown error'}`
+        message: `GitHub API error: ${response.status} ${response.statusText} - ${responseData.message || 'Unknown error'}`
       };
     }
 
