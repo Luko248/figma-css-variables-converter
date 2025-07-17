@@ -1,6 +1,18 @@
-# Figma Variables to GitHub Plugin - Source Code Structure
+# Figma CSS Variables Converter
 
-This directory contains the modular source code for the Figma Variables to GitHub Plugin.
+A Figma plugin that converts Figma variables to CSS custom properties and automatically pushes them to a GitHub repository.
+
+## Features
+
+- 🎨 Converts Figma variables to CSS custom properties
+- 🔄 Automatically detects variable types (colors, spacing, sizing, etc.)
+- 📤 Pushes generated CSS directly to GitHub
+- 🏗️ Modular TypeScript architecture
+- 🔧 Configurable GitHub integration
+
+## Source Code Structure
+
+The plugin uses a modular architecture with the following structure:
 
 ## File Structure
 
@@ -72,3 +84,32 @@ The plugin uses TypeScript compilation. The main entry point is `../code.ts` whi
 ## Security Note
 
 Never commit your GitHub token to version control. The `.gitignore` file is configured to help prevent accidental commits of sensitive data.
+
+## Development
+
+### Building the Plugin
+
+```bash
+npm run build
+```
+
+### Linting
+
+```bash
+npm run lint
+npm run lint:fix
+```
+
+### Watching for Changes
+
+```bash
+npm run watch
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Lukas Chylik

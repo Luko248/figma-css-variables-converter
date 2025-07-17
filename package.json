@@ -1,7 +1,7 @@
 {
-  "name": "Variable-convertor",
+  "name": "figma-css-variables-converter",
   "version": "1.0.0",
-  "description": "Your Figma Plugin",
+  "description": "Figma plugin to convert Figma variables to CSS variables and push to GitHub",
   "main": "code.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -9,8 +9,8 @@
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
     "watch": "npm run build -- --watch"
   },
-  "author": "",
-  "license": "",
+  "author": "Lukas Chylik",
+  "license": "MIT",
   "devDependencies": {
     "@figma/eslint-plugin-figma-plugins": "*",
     "@figma/plugin-typings": "*",

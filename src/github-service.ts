@@ -19,13 +19,6 @@ export interface GitHubResponse {
 }
 
 /**
- * Check if GitHub token is configured
- */
-export function isGitHubTokenConfigured(): boolean {
-  return GITHUB_CONFIG.token !== "YOUR_GITHUB_TOKEN_HERE";
-}
-
-/**
  * Get current file from GitHub repository
  */
 export async function getCurrentFile(): Promise<{ sha: string | null; exists: boolean }> {
@@ -66,7 +59,7 @@ export async function getCurrentFile(): Promise<{ sha: string | null; exists: bo
 export async function pushToGitHub(content: string): Promise<GitHubResponse> {
   const { owner, repo, path, branch } = GITHUB_CONFIG;
 
-  if (!isGitHubTokenConfigured()) {
+  if (GITHUB_CONFIG.token === "YOUR_GITHUB_TOKEN_HERE") {
     const error = "Please add your GitHub token to the plugin configuration!";
     figma.notify(`❌ ${error}`);
     return { success: false, error };
