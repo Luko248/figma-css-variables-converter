@@ -3,11 +3,20 @@
   "id": "1527312977182873836",
   "api": "1.0.0",
   "main": "code.js",
-  "capabilities": [],
+  "capabilities": [
+    "codegen"
+  ],
+  "codegenLanguages": [
+    {
+      "label": "CSS",
+      "value": "css"
+    }
+  ],
   "enableProposedApi": false,
   "documentAccess": "dynamic-page",
   "editorType": [
-    "figma"
+    "figma",
+    "dev"
   ],
   "networkAccess": {
     "allowedDomains": [

@@ -9,6 +9,7 @@ dist/
 build/
 *.js
 !build-config.js
+!fix-figma-compat.js
 *.js.map
 
 # TypeScript
