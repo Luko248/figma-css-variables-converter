@@ -35,6 +35,7 @@ declare global {
     name: string;
     resolvedType: 'COLOR' | 'FLOAT' | 'STRING' | 'BOOLEAN';
     valuesByMode: { [modeId: string]: RGB | RGBA | number | string | boolean };
+    setVariableCodeSyntax(platform: string, syntax: string): void;
   }
 
   /** RGB color representation */

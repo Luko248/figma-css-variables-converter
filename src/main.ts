@@ -49,6 +49,9 @@ export async function convertVariablesToCSS(): Promise<void> {
               type: variable.resolvedType.toLowerCase()
             });
             
+            // Set the variable code syntax for Figma web devmode display
+            variable.setVariableCodeSyntax('WEB', `var(${cssVariableName})`);
+            
             console.log(`✅ ${cssVariableName}: ${cssValue}`);
           } else {
             console.warn(`⚠️ Could not generate CSS value for ${variable.name}`);
@@ -66,6 +69,9 @@ export async function convertVariablesToCSS(): Promise<void> {
     }
     
     console.log(`📝 Generated ${cssVariables.length} CSS variables`);
+    
+    // Notify user that variables are converted to development-friendly format
+    figma.notify(`✅ ${cssVariables.length} variables converted to development-friendly format`);
     
     // Set syntax highlighting in Figma
     figma.codegen.preferences.language = 'CSS';
