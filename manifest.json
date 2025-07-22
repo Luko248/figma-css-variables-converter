@@ -1,5 +1,5 @@
 {
-  "name": "Variable-convertor",
+  "name": "Figma CSS Variables Convertor and Exporter",
   "id": "1527312977182873836",
   "api": "1.0.0",
   "main": "code.js",
