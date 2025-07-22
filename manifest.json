@@ -3,6 +3,7 @@
   "id": "1527312977182873836",
   "api": "1.0.0",
   "main": "code.js",
+  "ui": "ui.html",
   "capabilities": [
     "codegen"
   ],

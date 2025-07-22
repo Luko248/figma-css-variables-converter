@@ -6,20 +6,19 @@ import { generateCSSValue, buildCSSOutput } from './css-generator';
 import { generateCSSVariableName } from './variable-detectors';
 import { pushToGitHub } from './github-service';
 
-/**
- * Main function that orchestrates the conversion of Figma variables to CSS
- * and pushes the result to GitHub
- * 
- * @returns Promise that resolves when the conversion and upload is complete
- */
 // Global flag to prevent multiple executions
 let isRunning = false;
 
-export async function convertVariablesToCSS(): Promise<void> {
+/**
+ * Converts Figma variables to CSS format and updates Figma web devmode
+ * 
+ * @returns Promise with conversion results
+ */
+export async function convertVariablesToCSS(): Promise<{variables: any[], count: number}> {
   // Prevent multiple simultaneous executions
   if (isRunning) {
     console.log('⚠️ Plugin already running, ignoring duplicate call');
-    return;
+    throw new Error('Plugin already running');
   }
   
   isRunning = true;
@@ -28,9 +27,7 @@ export async function convertVariablesToCSS(): Promise<void> {
     const collections: VariableCollection[] = await figma.variables.getLocalVariableCollectionsAsync();
     
     if (collections.length === 0) {
-      figma.notify("❌ No variable collections found! Create some variables first.");
-      figma.closePlugin();
-      return;
+      throw new Error('No variable collections found! Create some variables first.');
     }
 
     console.log(`📊 Found ${collections.length} variable collection(s)`);
@@ -72,9 +69,7 @@ export async function convertVariablesToCSS(): Promise<void> {
     }
     
     if (cssVariables.length === 0) {
-      figma.notify("❌ No valid CSS variables could be generated!");
-      figma.closePlugin();
-      return;
+      throw new Error('No valid CSS variables could be generated!');
     }
     
     console.log(`📝 Generated ${cssVariables.length} CSS variables`);
@@ -95,39 +90,146 @@ export async function convertVariablesToCSS(): Promise<void> {
       console.warn('⚠️ Batch syntax update failed:', error);
     }
     
-    // Notify user that variables are converted to development-friendly format
-    figma.notify(`✅ ${cssVariables.length} variables converted to development-friendly format`);
-    
     // Set syntax highlighting in Figma
     figma.codegen.preferences.language = 'CSS';
     
-    // Build CSS output
-    const cssOutput = buildCSSOutput(cssVariables);
-    console.log('🎨 CSS Output generated:', cssOutput);
+    console.log(`✅ Successfully converted ${cssVariables.length} variables`);
     
-    // Push to GitHub
-    console.log('🚀 Pushing to GitHub...');
-    const githubResult = await pushToGitHub(cssOutput);
+    // Return variables without the variable reference for serialization
+    const serializableVariables = cssVariables.map(v => ({
+      name: v.name,
+      value: v.value,
+      type: v.type
+    }));
     
-    if (githubResult.success) {
-      figma.notify(`✅ Success! ${cssVariables.length} variables pushed to GitHub`);
-      console.log('✅ GitHub push successful:', githubResult.message);
-    } else {
-      figma.notify(`❌ GitHub Error: ${githubResult.message}`);
-      console.error('❌ GitHub push failed:', githubResult.message);
-    }
-    
-    console.log(`GitHub push: ${githubResult.success ? 'SUCCESS' : 'FAILED'}`);
+    return { variables: serializableVariables, count: cssVariables.length };
     
   } catch (error) {
-    console.error("Error in main function:", error);
-    figma.notify(`❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+    console.error("Error in conversion:", error);
+    throw error;
   } finally {
     isRunning = false;
   }
-  
-  figma.closePlugin();
 }
 
-// Start the plugin
-convertVariablesToCSS();
+/**
+ * Exports CSS variables to GitHub repository
+ * 
+ * @param variables - Array of CSS variables to export
+ * @returns Promise with export results
+ */
+export async function exportToGitHub(variables: Array<{name: string, value: string, type: string}>): Promise<{success: boolean, message: string}> {
+  try {
+    console.log('🚀 Starting GitHub export...');
+    
+    // Build CSS output
+    const cssOutput = buildCSSOutput(variables);
+    console.log('🎨 CSS Output generated:', cssOutput);
+    
+    // Push to GitHub
+    const githubResult = await pushToGitHub(cssOutput);
+    
+    if (githubResult.success) {
+      console.log('✅ GitHub push successful:', githubResult.message);
+      return { success: true, message: `Successfully exported ${variables.length} variables` };
+    } else {
+      console.error('❌ GitHub push failed:', githubResult.message);
+      return { success: false, message: githubResult.message };
+    }
+  } catch (error) {
+    console.error('❌ Error in GitHub export:', error);
+    return { success: false, message: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+/**
+ * Main plugin entry point with UI support
+ */
+function main() {
+  // Show the UI
+  figma.showUI(__html__, {
+    width: 320,
+    height: 480,
+    themeColors: true
+  });
+  
+  // Handle messages from UI
+  figma.ui.onmessage = async (msg) => {
+    const { type, variables } = msg;
+    
+    try {
+      switch (type) {
+        case 'convert-variables':
+          try {
+            const result = await convertVariablesToCSS();
+            figma.ui.postMessage({
+              type: 'convert-success',
+              data: {
+                variables: result.variables,
+                count: result.count
+              }
+            });
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'convert-error',
+              data: {
+                message: error instanceof Error ? error.message : 'Unknown error'
+              }
+            });
+          }
+          break;
+        
+        case 'export-github':
+          if (!variables) {
+            figma.ui.postMessage({
+              type: 'export-error',
+              data: { message: 'No variables to export' }
+            });
+            return;
+          }
+          
+          try {
+            const result = await exportToGitHub(variables);
+            if (result.success) {
+              figma.ui.postMessage({
+                type: 'export-success',
+                data: { message: result.message }
+              });
+            } else {
+              figma.ui.postMessage({
+                type: 'export-error',
+                data: { message: result.message }
+              });
+            }
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'export-error',
+              data: {
+                message: error instanceof Error ? error.message : 'Unknown error'
+              }
+            });
+          }
+          break;
+        
+        case 'close-plugin':
+          figma.closePlugin();
+          break;
+        
+        default:
+          console.warn('Unknown message type:', type);
+      }
+    } catch (error) {
+      console.error('Error handling message:', error);
+      figma.ui.postMessage({
+        type: 'status-update',
+        data: {
+          message: 'An unexpected error occurred',
+          type: 'error'
+        }
+      });
+    }
+  };
+}
+
+// Start the plugin with UI
+main();

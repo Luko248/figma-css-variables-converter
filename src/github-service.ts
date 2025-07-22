@@ -76,7 +76,7 @@ export async function pushToGitHub(content: string): Promise<GitHubApiResponse> 
     const url = `${GITHUB_API_BASE}/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
     
     const requestBody = {
-      message: `Update CSS variables from Figma - ${new Date().toISOString()}`,
+      message: `feat: update CSS variables from Figma\n\n- Generated at ${new Date().toISOString()}\n- Updated variable names to development-friendly format\n- HSL colors with decimal alpha support\n- Rem units for consistent sizing\n- Semantic naming with type prefixes`,
       content: base64Encode(content),
       branch: GITHUB_CONFIG.branch,
       ...(isUpdate && existingFile?.sha ? { sha: existingFile.sha } : {})

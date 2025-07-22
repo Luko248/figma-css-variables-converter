@@ -61,9 +61,21 @@ declare global {
         language: string;
       };
     };
+    ui: {
+      postMessage(message: any): void;
+      onmessage: ((message: any) => void) | null;
+    };
     notify(message: string): void;
     closePlugin(): void;
+    showUI(html: string, options?: {
+      width?: number;
+      height?: number;
+      themeColors?: boolean;
+    }): void;
   };
+
+  /** Global variable containing the UI HTML */
+  const __html__: string;
 }
 
 export {};
