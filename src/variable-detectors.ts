@@ -3,10 +3,11 @@
 export function detectVariableType(name: string): string {
   const lowerName = name.toLowerCase();
   
-  // Spacing detection
+  // Spacing/padding detection (including pad, padinline, padblock)
   if (lowerName.includes('spacing') || lowerName.includes('space') || 
       lowerName.includes('gap') || lowerName.includes('margin') || 
-      lowerName.includes('padding') || /\b(xs|sm|md|lg|xl|xxl)\b/.test(lowerName)) {
+      lowerName.includes('padding') || lowerName.includes('pad') ||
+      /\b(xs|sm|md|lg|xl|xxl)\b/.test(lowerName)) {
     return 'spacing';
   }
   
@@ -55,16 +56,49 @@ export function detectVariableType(name: string): string {
   return 'other';
 }
 
-export function generateCSSVariableName(collectionName: string, variableName: string): string {
-  const cleanCollection = collectionName.toLowerCase()
+export function generateCSSVariableName(_collectionName: string, variableName: string): string {
+  // Detect the variable type based on the variable name
+  const variableType = detectVariableType(variableName);
+  
+  // Convert variable type to a shortened prefix
+  const typePrefix = getTypePrefix(variableType);
+  
+  // Clean and format the variable name
+  const cleanVariable = variableName
+    // Split camelCase and PascalCase
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    // Convert to lowercase
+    .toLowerCase()
+    // Replace spaces and special characters with hyphens
     .replace(/[^a-z0-9]/g, '-')
+    // Remove duplicate hyphens
     .replace(/-+/g, '-')
+    // Remove leading/trailing hyphens
     .replace(/^-|-$/g, '');
   
-  const cleanVariable = variableName.toLowerCase()
-    .replace(/[^a-z0-9]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-  
-  return `--${cleanCollection}-${cleanVariable}`;
+  return `--${typePrefix}_${cleanVariable}`;
+}
+
+function getTypePrefix(variableType: string): string {
+  switch (variableType) {
+    case 'spacing':
+      return 'space';
+    case 'sizing':
+      return 'size';
+    case 'border-radius':
+      return 'radius';
+    case 'opacity':
+      return 'opacity';
+    case 'elevation':
+      return 'elevation';
+    case 'font-family':
+      return 'font';
+    case 'font-weight':
+      return 'weight';
+    case 'animation':
+      return 'anim';
+    case 'other':
+    default:
+      return 'color'; // Default to color for most variables
+  }
 }
