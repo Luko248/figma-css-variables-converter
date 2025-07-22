@@ -143,22 +143,231 @@ export async function exportToGitHub(variables: Array<{name: string, value: stri
 }
 
 /**
+ * Loads all variable collections (read-only with current API)
+ */
+export async function loadCollections(): Promise<{collections: {id: string, name: string, variableCount: number}[]}> {
+  try {
+    const collections = await figma.variables.getLocalVariableCollectionsAsync();
+    
+    const collectionsData = collections.map(collection => ({
+      id: collection.id,
+      name: collection.name,
+      variableCount: collection.variableIds.length
+    }));
+    
+    return { collections: collectionsData };
+  } catch (error) {
+    console.error('Error loading collections:', error);
+    throw new Error('Failed to load collections');
+  }
+}
+
+/**
+ * Loads variables for a specific collection (by matching collection ID with variables)
+ */
+export async function loadVariables(collectionId: string): Promise<{variables: {id: string, name: string, resolvedType: string, valuesByMode: Record<string, unknown>}[]}> {
+  try {
+    const collections = await figma.variables.getLocalVariableCollectionsAsync();
+    const targetCollection = collections.find(c => c.id === collectionId);
+    
+    if (!targetCollection) {
+      throw new Error('Collection not found');
+    }
+    
+    const variables = [];
+    
+    for (const variableId of targetCollection.variableIds) {
+      const variable = await figma.variables.getVariableByIdAsync(variableId);
+      if (variable) {
+        variables.push({
+          id: variable.id,
+          name: variable.name,
+          resolvedType: variable.resolvedType,
+          valuesByMode: variable.valuesByMode
+        });
+      }
+    }
+    
+    return { variables };
+  } catch (error) {
+    console.error('Error loading variables:', error);
+    throw new Error('Failed to load variables');
+  }
+}
+
+/**
+ * Creates a new variable collection - Currently not supported in limited API
+ */
+export async function createCollection(_name: string): Promise<{success: boolean, collection?: any}> {
+  try {
+    // The current API doesn't expose collection creation methods
+    throw new Error('Creating collections is not available in the current API version. Please create collections manually in Figma.');
+  } catch (error) {
+    console.error('Error creating collection:', error);
+    throw error instanceof Error ? error : new Error('Failed to create collection');
+  }
+}
+
+/**
+ * Creates a new variable in a collection - Currently not supported in limited API
+ */
+export async function createVariable(_collectionId: string, _name: string, _type: string, _value: any): Promise<{success: boolean, variable?: any}> {
+  try {
+    // The current API doesn't expose variable creation methods
+    throw new Error('Creating variables is not available in the current API version. Please create variables manually in Figma.');
+  } catch (error) {
+    console.error('Error creating variable:', error);
+    throw error instanceof Error ? error : new Error('Failed to create variable');
+  }
+}
+
+/**
+ * Deletes a variable collection - Currently not supported in limited API
+ */
+export async function deleteCollection(_collectionId: string): Promise<{success: boolean}> {
+  try {
+    // The current API doesn't expose collection deletion methods
+    throw new Error('Deleting collections is not available in the current API version. Please delete collections manually in Figma.');
+  } catch (error) {
+    console.error('Error deleting collection:', error);
+    throw error instanceof Error ? error : new Error('Failed to delete collection');
+  }
+}
+
+/**
+ * Deletes a variable - Currently not supported in limited API
+ */
+export async function deleteVariable(_variableId: string): Promise<{success: boolean}> {
+  try {
+    // The current API doesn't expose variable deletion methods
+    throw new Error('Deleting variables is not available in the current API version. Please delete variables manually in Figma.');
+  } catch (error) {
+    console.error('Error deleting variable:', error);
+    throw error instanceof Error ? error : new Error('Failed to delete variable');
+  }
+}
+
+/**
  * Main plugin entry point with UI support
  */
 function main() {
-  // Show the UI
+  // Show the UI with increased height for the new tabs
   figma.showUI(__html__, {
     width: 320,
-    height: 480,
+    height: 580,
     themeColors: true
   });
   
   // Handle messages from UI
   figma.ui.onmessage = async (msg) => {
-    const { type, variables } = msg;
+    const { type, variables, collectionId, name, variableId, value, variableType } = msg;
     
     try {
       switch (type) {
+        // Design Tokens Messages
+        case 'load-collections':
+          try {
+            const result = await loadCollections();
+            figma.ui.postMessage({
+              type: 'collections-loaded',
+              data: result
+            });
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'error',
+              data: {
+                message: error instanceof Error ? error.message : 'Failed to load collections'
+              }
+            });
+          }
+          break;
+        
+        case 'load-variables':
+          try {
+            const result = await loadVariables(collectionId);
+            figma.ui.postMessage({
+              type: 'variables-loaded',
+              data: result
+            });
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'error',
+              data: {
+                message: error instanceof Error ? error.message : 'Failed to load variables'
+              }
+            });
+          }
+          break;
+        
+        case 'create-collection':
+          try {
+            await createCollection(name);
+            figma.ui.postMessage({
+              type: 'collection-created',
+              data: { success: true }
+            });
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'error',
+              data: {
+                message: error instanceof Error ? error.message : 'Failed to create collection'
+              }
+            });
+          }
+          break;
+        
+        case 'create-variable':
+          try {
+            await createVariable(collectionId, name, variableType || 'COLOR', value);
+            figma.ui.postMessage({
+              type: 'variable-created',
+              data: { success: true }
+            });
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'error',
+              data: {
+                message: error instanceof Error ? error.message : 'Failed to create variable'
+              }
+            });
+          }
+          break;
+        
+        case 'delete-collection':
+          try {
+            await deleteCollection(collectionId);
+            figma.ui.postMessage({
+              type: 'collection-deleted',
+              data: { success: true }
+            });
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'error',
+              data: {
+                message: error instanceof Error ? error.message : 'Failed to delete collection'
+              }
+            });
+          }
+          break;
+        
+        case 'delete-variable':
+          try {
+            await deleteVariable(variableId);
+            figma.ui.postMessage({
+              type: 'variable-deleted',
+              data: { success: true }
+            });
+          } catch (error) {
+            figma.ui.postMessage({
+              type: 'error',
+              data: {
+                message: error instanceof Error ? error.message : 'Failed to delete variable'
+              }
+            });
+          }
+          break;
+
+        // Converter Messages (existing functionality)
         case 'convert-variables':
           try {
             const result = await convertVariablesToCSS();
@@ -179,6 +388,7 @@ function main() {
           }
           break;
         
+        // Exporter Messages (existing functionality)
         case 'export-github':
           if (!variables) {
             figma.ui.postMessage({

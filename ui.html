@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Figma CSS Variables Converter</title>
+    <title>Figma Design Tokens Manager</title>
     <style>
         * {
             box-sizing: border-box;
@@ -16,13 +16,16 @@
             color: #000000;
             font-size: 12px;
             line-height: 1.4;
-            padding: 16px;
-            min-width: 280px;
+            min-width: 300px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 24px;
+            padding: 16px;
+            border-bottom: 1px solid #e6e6e6;
         }
 
         .header h1 {
@@ -35,6 +38,51 @@
         .header p {
             font-size: 11px;
             color: #8c8c8c;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e6e6e6;
+            background: #f8f8f8;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            font-weight: 500;
+            color: #8c8c8c;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            background: #f0f0f0;
+            color: #000000;
+        }
+
+        .tab.active {
+            background: #ffffff;
+            color: #0d99ff;
+            font-weight: 600;
+            border-bottom: 2px solid #0d99ff;
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
         }
 
         .section {
@@ -162,87 +210,446 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .collections-container, .variables-container {
+            min-height: 120px;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #ffffff;
+        }
+
+        .collection-item, .variable-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .collection-item:hover, .variable-item:hover {
+            background: #f0f0f0;
+        }
+
+        .collection-item.selected, .variable-item.selected {
+            background: #e8f4ff;
+            border: 1px solid #a7d0ff;
+        }
+
+        .collection-name, .variable-name {
+            font-weight: 500;
+            font-size: 11px;
+        }
+
+        .collection-meta, .variable-meta {
+            font-size: 10px;
+            color: #8c8c8c;
+        }
+
+        .variable-value {
+            font-size: 10px;
+            color: #666;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-btn {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .collection-item:hover .action-btn,
+        .variable-item:hover .action-btn {
+            opacity: 1;
+        }
+
+        .action-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .loading-state, .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #8c8c8c;
+            font-size: 11px;
+            text-align: center;
+            height: 80px;
+        }
+
+        .loading-state .loading {
+            margin-bottom: 8px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            width: 280px;
+            max-width: 90vw;
+        }
+
+        .modal-header {
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .modal-description {
+            font-size: 11px;
+            color: #8c8c8c;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e6e6e6;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #ffffff;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #0d99ff;
+        }
+
+        .color-input {
+            width: 60px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid #e6e6e6;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .modal-actions .button {
+            margin-bottom: 0;
+            padding: 8px 16px;
+            width: auto;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>CSS Variables Converter</h1>
-        <p>Convert Figma variables to development-friendly format</p>
+        <h1>Design Tokens Manager</h1>
+        <p>Manage, convert, and export Figma design tokens</p>
     </div>
 
-    <div id="status-message" class="hidden"></div>
-
-    <div class="section">
-        <h2>🎨 Convert Variables</h2>
-        <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
-            Updates Figma web devmode with CSS variable names
-        </p>
-        <button id="convert-btn" class="button button-primary">
-            <span class="icon">🔄</span>
-            Convert Variables to Dev Format
-        </button>
-        <div id="variables-count" class="variables-count hidden"></div>
+    <div class="tabs">
+        <button class="tab active" data-tab="design-tokens">Design Tokens</button>
+        <button class="tab" data-tab="converter">Converter</button>
+        <button class="tab" data-tab="exporter">Exporter</button>
     </div>
 
-    <div class="section">
-        <h2>📤 Export to GitHub</h2>
-        <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
-            Generate CSS file and push to your repository
-        </p>
-        <button id="export-btn" class="button button-secondary" disabled>
-            <span class="icon">📤</span>
-            Export CSS to GitHub
-        </button>
-        <div id="export-status" class="hidden" style="font-size: 10px; color: #8c8c8c; margin-top: 8px; text-align: center;">
-            Convert variables first to enable export
+    <div class="tab-content">
+        <div id="status-message" class="hidden"></div>
+
+        <!-- Design Tokens Tab -->
+        <div id="design-tokens" class="tab-panel active">
+            <div class="section">
+                <h2>🎨 Variable Collections</h2>
+                <div id="collections-list" class="collections-container">
+                    <div class="loading-state">
+                        <div class="loading"></div>
+                        <span>Loading collections...</span>
+                    </div>
+                </div>
+                <div class="info-message" style="padding: 8px; background: #e8f4ff; border: 1px solid #a7d0ff; border-radius: 4px; font-size: 10px; color: #0d4a80; text-align: center; margin-top: 8px;">
+                    Create collections manually in Figma UI to see them here
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>✏️ Variables</h2>
+                <div id="variables-list" class="variables-container">
+                    <div class="empty-state">Select a collection to view variables</div>
+                </div>
+                <div class="info-message" style="padding: 8px; background: #e8f4ff; border: 1px solid #a7d0ff; border-radius: 4px; font-size: 10px; color: #0d4a80; text-align: center; margin-top: 8px;">
+                    Create variables manually in Figma UI to see them here
+                </div>
+            </div>
+        </div>
+
+        <!-- Converter Tab -->
+        <div id="converter" class="tab-panel">
+            <div class="section">
+                <h2>🎨 Convert Variables</h2>
+                <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
+                    Updates Figma web devmode with CSS variable names
+                </p>
+                <button id="convert-btn" class="button button-primary">
+                    <span class="icon">🔄</span>
+                    Convert Variables to Dev Format
+                </button>
+                <div id="variables-count" class="variables-count hidden"></div>
+            </div>
+        </div>
+
+        <!-- Exporter Tab -->
+        <div id="exporter" class="tab-panel">
+            <div class="section">
+                <h2>📤 Export to GitHub</h2>
+                <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
+                    Generate CSS file and push to your repository
+                </p>
+                <button id="export-btn" class="button button-secondary" disabled>
+                    <span class="icon">📤</span>
+                    Export CSS to GitHub
+                </button>
+                <div id="export-status" class="hidden" style="font-size: 10px; color: #8c8c8c; margin-top: 8px; text-align: center;">
+                    Convert variables first to enable export
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        const convertBtn = document.getElementById('convert-btn');
-        const exportBtn = document.getElementById('export-btn');
-        const statusMessage = document.getElementById('status-message');
-        const variablesCount = document.getElementById('variables-count');
-        const exportStatus = document.getElementById('export-status');
 
+    <script>
+        // DOM Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        const statusMessage = document.getElementById('status-message');
+        
+        // Design Tokens Tab Elements
+        const collectionsContainer = document.getElementById('collections-list');
+        const variablesContainer = document.getElementById('variables-list');
+        
+        // Converter Tab Elements
+        const convertBtn = document.getElementById('convert-btn');
+        const variablesCount = document.getElementById('variables-count');
+        
+        // Exporter Tab Elements
+        const exportBtn = document.getElementById('export-btn');
+        const exportStatus = document.getElementById('export-status');
+        
+        
+        // Global State
+        let collections = [];
+        let selectedCollection = null;
+        let variables = [];
         let convertedVariables = null;
 
-        // Show status message
+        // Utility Functions
         function showStatus(message, type = 'info') {
             statusMessage.className = `status status-${type}`;
             statusMessage.textContent = message;
             statusMessage.classList.remove('hidden');
         }
 
-        // Hide status message
         function hideStatus() {
             statusMessage.classList.add('hidden');
         }
 
-        // Update button loading state
         function setButtonLoading(button, loading, loadingText) {
             if (loading) {
                 button.innerHTML = `<span class="loading"></span> ${loadingText}`;
                 button.disabled = true;
             } else {
-                // Reset button content based on which button it is
-                if (button.id === 'convert-btn') {
-                    button.innerHTML = '<span class="icon">🔄</span> Convert Variables to Dev Format';
-                } else if (button.id === 'export-btn') {
-                    button.innerHTML = '<span class="icon">📤</span> Export CSS to GitHub';
-                }
+                resetButtonContent(button);
                 button.disabled = false;
             }
         }
 
-        // Convert variables
+        function resetButtonContent(button) {
+            const buttonConfigs = {
+                'convert-btn': '<span class="icon">🔄</span> Convert Variables to Dev Format',
+                'export-btn': '<span class="icon">📤</span> Export CSS to GitHub'
+            };
+            button.innerHTML = buttonConfigs[button.id] || button.innerHTML;
+        }
+
+        // Tab Management
+        function switchTab(targetTab) {
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabPanels.forEach(panel => panel.classList.remove('active'));
+            
+            document.querySelector(`[data-tab="${targetTab}"]`).classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+            
+            // Load data for Design Tokens tab
+            if (targetTab === 'design-tokens') {
+                loadCollections();
+            }
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                switchTab(targetTab);
+            });
+        });
+
+        // Design Tokens Management
+        function loadCollections() {
+            collectionsContainer.innerHTML = '<div class="loading-state"><div class="loading"></div><span>Loading collections...</span></div>';
+            
+            parent.postMessage({ 
+                pluginMessage: { 
+                    type: 'load-collections' 
+                } 
+            }, '*');
+        }
+
+        function renderCollections(collectionsData) {
+            collections = collectionsData;
+            
+            if (collections.length === 0) {
+                collectionsContainer.innerHTML = '<div class="empty-state">No collections found<br><small>Create your first collection to get started</small></div>';
+                return;
+            }
+
+            collectionsContainer.innerHTML = collections.map(collection => `
+                <div class="collection-item" data-collection-id="${collection.id}">
+                    <div>
+                        <div class="collection-name">${collection.name}</div>
+                        <div class="collection-meta">${collection.variableCount || 0} variables</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add click handlers for collection selection
+            document.querySelectorAll('.collection-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    selectCollection(item.dataset.collectionId);
+                });
+            });
+        }
+
+        function selectCollection(collectionId) {
+            selectedCollection = collections.find(c => c.id === collectionId);
+            
+            // Update UI selection
+            document.querySelectorAll('.collection-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-collection-id="${collectionId}"]`).classList.add('selected');
+            
+            // Load variables for this collection
+            loadVariables(collectionId);
+        }
+
+        function loadVariables(collectionId) {
+            variablesContainer.innerHTML = '<div class="loading-state"><div class="loading"></div><span>Loading variables...</span></div>';
+            
+            parent.postMessage({ 
+                pluginMessage: { 
+                    type: 'load-variables',
+                    collectionId: collectionId
+                } 
+            }, '*');
+        }
+
+        function renderVariables(variablesData) {
+            variables = variablesData;
+            
+            if (variables.length === 0) {
+                variablesContainer.innerHTML = '<div class="empty-state">No variables in this collection<br><small>Add your first variable</small></div>';
+                return;
+            }
+
+            variablesContainer.innerHTML = variables.map(variable => `
+                <div class="variable-item" data-variable-id="${variable.id}">
+                    <div>
+                        <div class="variable-name">${variable.name}</div>
+                        <div class="variable-value">${formatVariableValue(variable)}</div>
+                        <div class="variable-meta">${variable.resolvedType}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatVariableValue(variable) {
+            if (!variable.valuesByMode || Object.keys(variable.valuesByMode).length === 0) {
+                return 'No value';
+            }
+            
+            const firstMode = Object.keys(variable.valuesByMode)[0];
+            const value = variable.valuesByMode[firstMode];
+            
+            switch (variable.resolvedType) {
+                case 'COLOR':
+                    if (value.type === 'VARIABLE_ALIAS') {
+                        return `→ ${value.id}`;
+                    }
+                    return `rgba(${Math.round(value.r * 255)}, ${Math.round(value.g * 255)}, ${Math.round(value.b * 255)}, ${value.a})`;
+                case 'FLOAT':
+                    return value.toString();
+                case 'STRING':
+                    return `"${value}"`;
+                case 'BOOLEAN':
+                    return value ? 'true' : 'false';
+                default:
+                    return String(value);
+            }
+        }
+
+
+
+        // Converter Tab Logic (existing functionality)
         convertBtn.addEventListener('click', async () => {
             hideStatus();
             setButtonLoading(convertBtn, true, 'Converting...');
             variablesCount.classList.add('hidden');
 
             try {
-                // Send message to main plugin code to convert variables
                 parent.postMessage({ 
                     pluginMessage: { 
                         type: 'convert-variables' 
@@ -254,7 +661,7 @@
             }
         });
 
-        // Export to GitHub
+        // Exporter Tab Logic (existing functionality)
         exportBtn.addEventListener('click', async () => {
             if (!convertedVariables) {
                 showStatus('Convert variables first', 'error');
@@ -265,7 +672,6 @@
             setButtonLoading(exportBtn, true, 'Exporting...');
 
             try {
-                // Send message to main plugin code to export to GitHub
                 parent.postMessage({ 
                     pluginMessage: { 
                         type: 'export-github',
@@ -278,11 +684,21 @@
             }
         });
 
-        // Listen for messages from the main plugin code
+        // Message Handler
         window.addEventListener('message', (event) => {
             const { type, data } = event.data.pluginMessage || {};
 
             switch (type) {
+                // Design Tokens Messages
+                case 'collections-loaded':
+                    renderCollections(data.collections);
+                    break;
+                
+                case 'variables-loaded':
+                    renderVariables(data.variables);
+                    break;
+
+                // Converter Messages (existing)
                 case 'convert-success':
                     convertedVariables = data.variables;
                     showStatus(`✅ Converted ${data.count} variables successfully`, 'success');
@@ -300,6 +716,7 @@
                     setButtonLoading(convertBtn, false);
                     break;
 
+                // Exporter Messages (existing)
                 case 'export-success':
                     showStatus(`✅ Successfully exported to GitHub`, 'success');
                     setButtonLoading(exportBtn, false);
@@ -310,16 +727,19 @@
                     setButtonLoading(exportBtn, false);
                     break;
 
+                // Generic Messages
                 case 'status-update':
                     showStatus(data.message, data.type || 'info');
+                    break;
+                
+                case 'error':
+                    showStatus(`❌ ${data.message}`, 'error');
                     break;
             }
         });
 
-        // Auto-focus on load
-        window.addEventListener('load', () => {
-            convertBtn.focus();
-        });
+        // Initialize the Design Tokens tab
+        loadCollections();
     </script>
 </body>
 </html>
