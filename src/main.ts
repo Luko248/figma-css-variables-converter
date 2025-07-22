@@ -1,9 +1,17 @@
-// Main plugin logic
+/**
+ * Main plugin logic for converting Figma variables to CSS custom properties
+ */
 import './types';
 import { generateCSSValue, buildCSSOutput } from './css-generator';
 import { generateCSSVariableName } from './variable-detectors';
 import { pushToGitHub } from './github-service';
 
+/**
+ * Main function that orchestrates the conversion of Figma variables to CSS
+ * and pushes the result to GitHub
+ * 
+ * @returns Promise that resolves when the conversion and upload is complete
+ */
 export async function convertVariablesToCSS(): Promise<void> {
   try {
     const collections: VariableCollection[] = await figma.variables.getLocalVariableCollectionsAsync();
@@ -16,6 +24,7 @@ export async function convertVariablesToCSS(): Promise<void> {
 
     console.log(`📊 Found ${collections.length} variable collection(s)`);
     
+    /** Array to collect all processed CSS variables */
     const cssVariables: Array<{name: string, value: string, type: string}> = [];
     
     for (const collection of collections) {

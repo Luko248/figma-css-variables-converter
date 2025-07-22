@@ -1,104 +1,103 @@
-// Variable type detection functions
+/**
+ * Variable type detection and CSS naming utilities
+ */
 
-export function detectVariableType(name: string): string {
+/**
+ * Detects the type of a variable based on its name patterns
+ * 
+ * @param name - The variable name to analyze
+ * @returns The detected variable type category
+ */
+export const detectVariableType = (name: string): string => {
   const lowerName = name.toLowerCase();
   
-  // Spacing/padding detection (including pad, padinline, padblock)
-  if (lowerName.includes('spacing') || lowerName.includes('space') || 
-      lowerName.includes('gap') || lowerName.includes('margin') || 
-      lowerName.includes('padding') || lowerName.includes('pad') ||
-      /\b(xs|sm|md|lg|xl|xxl)\b/.test(lowerName)) {
-    return 'spacing';
-  }
+  const typeDetectors = [
+    { type: 'spacing', check: isSpacingVariable },
+    { type: 'sizing', check: isSizingVariable },
+    { type: 'border-radius', check: isRadiusVariable },
+    { type: 'opacity', check: isOpacityVariable },
+    { type: 'elevation', check: isElevationVariable },
+    { type: 'font-family', check: isFontFamilyVariable },
+    { type: 'font-weight', check: isFontWeightVariable },
+    { type: 'animation', check: isAnimationVariable },
+  ];
   
-  // Sizing detection
-  if (lowerName.includes('size') || lowerName.includes('width') || 
-      lowerName.includes('height') || lowerName.includes('dimension')) {
-    return 'sizing';
-  }
-  
-  // Border radius detection
-  if (lowerName.includes('radius') || lowerName.includes('rounded') || 
-      lowerName.includes('corner')) {
-    return 'border-radius';
-  }
-  
-  // Opacity detection
-  if (lowerName.includes('opacity') || lowerName.includes('alpha') || 
-      lowerName.includes('transparency')) {
-    return 'opacity';
-  }
-  
-  // Elevation/shadow detection
-  if (lowerName.includes('elevation') || lowerName.includes('shadow') || 
-      lowerName.includes('depth') || lowerName.includes('z-index')) {
-    return 'elevation';
-  }
-  
-  // Font family detection
-  if (lowerName.includes('font') && (lowerName.includes('family') || 
-      lowerName.includes('typeface'))) {
-    return 'font-family';
-  }
-  
-  // Font weight detection
-  if (lowerName.includes('weight') || lowerName.includes('bold') || 
-      lowerName.includes('light') || lowerName.includes('medium')) {
-    return 'font-weight';
-  }
-  
-  // Animation detection
-  if (lowerName.includes('duration') || lowerName.includes('timing') || 
-      lowerName.includes('animation') || lowerName.includes('transition')) {
-    return 'animation';
-  }
-  
-  return 'other';
-}
+  const detectedType = typeDetectors.find(detector => detector.check(lowerName));
+  return detectedType?.type || 'other';
+};
 
-export function generateCSSVariableName(_collectionName: string, variableName: string): string {
-  // Detect the variable type based on the variable name
+// Lambda functions for type detection
+const isSpacingVariable = (name: string): boolean =>
+  ['spacing', 'space', 'gap', 'margin', 'padding', 'pad'].some(term => name.includes(term)) ||
+  /\b(xs|sm|md|lg|xl|xxl)\b/.test(name);
+
+const isSizingVariable = (name: string): boolean =>
+  ['size', 'width', 'height', 'dimension'].some(term => name.includes(term));
+
+const isRadiusVariable = (name: string): boolean =>
+  ['radius', 'rounded', 'corner'].some(term => name.includes(term));
+
+const isOpacityVariable = (name: string): boolean =>
+  ['opacity', 'alpha', 'transparency'].some(term => name.includes(term));
+
+const isElevationVariable = (name: string): boolean =>
+  ['elevation', 'shadow', 'depth', 'z-index'].some(term => name.includes(term));
+
+const isFontFamilyVariable = (name: string): boolean =>
+  name.includes('font') && ['family', 'typeface'].some(term => name.includes(term));
+
+const isFontWeightVariable = (name: string): boolean =>
+  ['weight', 'bold', 'light', 'medium'].some(term => name.includes(term));
+
+const isAnimationVariable = (name: string): boolean =>
+  ['duration', 'timing', 'animation', 'transition'].some(term => name.includes(term));
+
+/**
+ * Generates a CSS custom property name from a Figma variable
+ * Format: --{type}_{clean-name} (e.g., --color_btn-bg, --space_btn-pad-inline)
+ * 
+ * @param _collectionName - Collection name (unused in current implementation)
+ * @param variableName - The Figma variable name
+ * @returns Formatted CSS custom property name
+ */
+export const generateCSSVariableName = (_collectionName: string, variableName: string): string => {
   const variableType = detectVariableType(variableName);
-  
-  // Convert variable type to a shortened prefix
   const typePrefix = getTypePrefix(variableType);
-  
-  // Clean and format the variable name
-  const cleanVariable = variableName
-    // Split camelCase and PascalCase
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
-    // Convert to lowercase
-    .toLowerCase()
-    // Replace spaces and special characters with hyphens
-    .replace(/[^a-z0-9]/g, '-')
-    // Remove duplicate hyphens
-    .replace(/-+/g, '-')
-    // Remove leading/trailing hyphens
-    .replace(/^-|-$/g, '');
+  const cleanVariable = cleanVariableName(variableName);
   
   return `--${typePrefix}_${cleanVariable}`;
-}
+};
 
-function getTypePrefix(variableType: string): string {
-  switch (variableType) {
-    case 'spacing':
-      return 'space';
-    case 'sizing':
-      return 'size';
-    case 'border-radius':
-      return 'radius';
-    case 'opacity':
-      return 'opacity';
-    case 'elevation':
-      return 'elevation';
-    case 'font-family':
-      return 'font';
-    case 'font-weight':
-      return 'weight';
-    case 'animation':
-      return 'anim';
-    case 'other':
-    default:
-      return 'color'; // Default to color for most variables
-  }
-}
+/**
+ * Cleans and formats variable name with camelCase to kebab-case conversion
+ * 
+ * @param name - Raw variable name
+ * @returns Cleaned variable name
+ */
+const cleanVariableName = (name: string): string => name
+  .replace(/([a-z])([A-Z])/g, '$1-$2') // Convert camelCase to kebab-case
+  .toLowerCase()
+  .replace(/[^a-z0-9-]/g, '') // Keep only letters, numbers, and hyphens
+  .replace(/-+/g, '-') // Remove duplicate hyphens
+  .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+
+/**
+ * Maps variable types to CSS prefix names
+ * 
+ * @param variableType - The detected variable type
+ * @returns Short prefix for CSS custom property names
+ */
+const getTypePrefix = (variableType: string): string => {
+  const typePrefixMap: Record<string, string> = {
+    spacing: 'space',
+    sizing: 'size',
+    'border-radius': 'radius',
+    opacity: 'opacity',
+    elevation: 'elevation',
+    'font-family': 'font',
+    'font-weight': 'weight',
+    animation: 'anim',
+  };
+  
+  return typePrefixMap[variableType] || 'color';
+};

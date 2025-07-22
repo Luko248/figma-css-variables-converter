@@ -1,18 +1,28 @@
-// GitHub API service functions
+/**
+ * GitHub API service for pushing CSS variables to repository
+ */
 import { base64Encode } from './utils';
 import { GITHUB_CONFIG, GITHUB_API_BASE } from './config';
 
+/** Response structure for GitHub file API */
 interface GitHubFileResponse {
   sha?: string;
   content?: string;
 }
 
+/** Standardized response format for GitHub operations */
 interface GitHubApiResponse {
   success: boolean;
   message: string;
   sha?: string;
 }
 
+/**
+ * Checks if a file exists in the GitHub repository
+ * 
+ * @param filePath - Path to the file in the repository
+ * @returns File information if exists, null if not found
+ */
 export async function checkFileExists(filePath: string): Promise<GitHubFileResponse | null> {
   try {
     const url = `${GITHUB_API_BASE}/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
@@ -46,6 +56,13 @@ export async function checkFileExists(filePath: string): Promise<GitHubFileRespo
   }
 }
 
+/**
+ * Pushes CSS content to GitHub repository
+ * Creates new file or updates existing file with generated CSS variables
+ * 
+ * @param content - CSS content to push to repository
+ * @returns Result object with success status and details
+ */
 export async function pushToGitHub(content: string): Promise<GitHubApiResponse> {
   try {
     console.log('🚀 Starting GitHub push...');

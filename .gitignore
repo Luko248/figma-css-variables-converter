@@ -71,3 +71,6 @@ temp/
 
 # Figma plugin specific
 # Keep manifest.json and code.js as they're needed for the plugin
+# Build output
+code.js
+config.json

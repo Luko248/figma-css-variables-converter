@@ -1,13 +1,16 @@
-// Figma API type definitions
+/**
+ * Type definitions for Figma Plugin API and custom interfaces
+ * Extends global environment with Figma-specific types and APIs
+ */
 declare global {
-  // Global console for Figma plugin environment
+  /** Console API available in Figma plugin environment */
   const console: {
     log(...args: unknown[]): void;
     error(...args: unknown[]): void;
     warn(...args: unknown[]): void;
   };
 
-  // Global fetch for Figma plugin environment
+  /** Fetch API available in Figma plugin environment */
   function fetch(input: string, init?: {
     method?: string;
     headers?: Record<string, string>;
@@ -19,12 +22,14 @@ declare global {
     json(): Promise<unknown>;
   }>;
 
+  /** Figma variable collection containing multiple design variables */
   interface VariableCollection {
     id: string;
     name: string;
     variableIds: string[];
   }
 
+  /** Individual Figma design variable with type and values */
   interface Variable {
     id: string;
     name: string;
@@ -32,16 +37,19 @@ declare global {
     valuesByMode: { [modeId: string]: RGB | RGBA | number | string | boolean };
   }
 
+  /** RGB color representation */
   interface RGB {
     r: number;
     g: number;
     b: number;
   }
 
+  /** RGBA color with alpha channel */
   interface RGBA extends RGB {
     a: number;
   }
 
+  /** Main Figma plugin API object */
   const figma: {
     variables: {
       getLocalVariableCollectionsAsync(): Promise<VariableCollection[]>;

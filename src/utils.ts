@@ -1,5 +1,13 @@
-// Utility functions for the Figma plugin
+/**
+ * Utility functions for the Figma plugin
+ */
 
+/**
+ * Custom base64 encoding implementation for GitHub API compatibility
+ * 
+ * @param str - String to encode
+ * @returns Base64 encoded string
+ */
 export function base64Encode(str: string): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   let result = "";
@@ -28,21 +36,97 @@ export function base64Encode(str: string): string {
   return result;
 }
 
-export function rgbToHex(r: number, g: number, b: number): string {
-  const toHex = (n: number): string => {
-    const hex = Math.round(n * 255).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
-  };
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
-
-export function rgbaToHex(r: number, g: number, b: number, a: number): string {
-  if (a === 1) {
-    return rgbToHex(r, g, b);
+/**
+ * Converts RGB color values to HSL format
+ * 
+ * @param r - Red component (0-1)
+ * @param g - Green component (0-1)
+ * @param b - Blue component (0-1)
+ * @returns HSL color string (e.g., hsl(120 100% 50%))
+ */
+export const rgbToHsl = (r: number, g: number, b: number): string => {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  
+  // Lightness
+  const l = (max + min) / 2;
+  
+  // Saturation
+  const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+  
+  // Hue
+  let h = 0;
+  if (delta !== 0) {
+    if (max === r) h = ((g - b) / delta) % 6;
+    else if (max === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
   }
-  const toHex = (n: number): string => {
-    const hex = Math.round(n * 255).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
-  };
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(a)}`;
-}
+  h = Math.round(h * 60);
+  if (h < 0) h += 360;
+  
+  const hslH = Math.round(h);
+  const hslS = Math.round(s * 100);
+  const hslL = Math.round(l * 100);
+  
+  return `hsl(${hslH} ${hslS}% ${hslL}%)`;
+};
+
+/**
+ * Converts RGBA color values to HSLA format with decimal alpha
+ * 
+ * @param r - Red component (0-1)
+ * @param g - Green component (0-1)
+ * @param b - Blue component (0-1)
+ * @param a - Alpha component (0-1)
+ * @returns HSLA color string (e.g., hsl(120 100% 50% / .5))
+ */
+export const rgbaToHsl = (r: number, g: number, b: number, a: number): string => {
+  if (a === 1) return rgbToHsl(r, g, b);
+  
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  
+  const l = (max + min) / 2;
+  const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+  
+  let h = 0;
+  if (delta !== 0) {
+    if (max === r) h = ((g - b) / delta) % 6;
+    else if (max === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+  }
+  h = Math.round(h * 60);
+  if (h < 0) h += 360;
+  
+  const hslH = Math.round(h);
+  const hslS = Math.round(s * 100);
+  const hslL = Math.round(l * 100);
+  const alpha = a < 1 ? `.${Math.round(a * 10)}` : '1';
+  
+  return `hsl(${hslH} ${hslS}% ${hslL}% / ${alpha})`;
+};
+
+/**
+ * Converts pixel values to rem units (assuming 16px base)
+ * 
+ * @param px - Pixel value
+ * @returns Rem value string (e.g., 1rem)
+ */
+export const pxToRem = (px: number): string => {
+  const rem = px / 16;
+  return `${rem}rem`;
+};
+
+/**
+ * Formats decimal alpha values properly (.1, .2, etc.)
+ * 
+ * @param alpha - Alpha value (0-1)
+ * @returns Formatted decimal string
+ */
+export const formatAlpha = (alpha: number): string => {
+  if (alpha === 1) return '1';
+  if (alpha === 0) return '0';
+  return `.${Math.round(alpha * 10)}`;
+};
