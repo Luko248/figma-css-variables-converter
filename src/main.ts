@@ -36,7 +36,7 @@ export async function convertVariablesToCSS(): Promise<void> {
     console.log(`📊 Found ${collections.length} variable collection(s)`);
     
     /** Array to collect all processed CSS variables */
-    const cssVariables: Array<{name: string, value: string, type: string}> = [];
+    const cssVariables: Array<{name: string, value: string, type: string, variable: Variable}> = [];
     
     for (const collection of collections) {
       console.log(`🔍 Processing collection: ${collection.name}`);
@@ -57,7 +57,8 @@ export async function convertVariablesToCSS(): Promise<void> {
             cssVariables.push({
               name: cssVariableName,
               value: cssValue,
-              type: variable.resolvedType.toLowerCase()
+              type: variable.resolvedType.toLowerCase(),
+              variable: variable
             });
             
             console.log(`✅ ${cssVariableName}: ${cssValue}`);
@@ -78,8 +79,21 @@ export async function convertVariablesToCSS(): Promise<void> {
     
     console.log(`📝 Generated ${cssVariables.length} CSS variables`);
     
-    // TODO: Re-enable setVariableCodeSyntax after fixing infinite loop
-    // console.log('✅ Skipping Figma web devmode syntax update to prevent infinite loop');
+    // Update Figma web devmode syntax (done after all processing to avoid loops)
+    let syntaxUpdateCount = 0;
+    try {
+      for (const cssVar of cssVariables) {
+        try {
+          cssVar.variable.setVariableCodeSyntax('WEB', `var(${cssVar.name})`);
+          syntaxUpdateCount++;
+        } catch (syntaxError) {
+          console.warn(`⚠️ Failed to set syntax for ${cssVar.name}:`, syntaxError);
+        }
+      }
+      console.log(`✅ Updated Figma web syntax for ${syntaxUpdateCount}/${cssVariables.length} variables`);
+    } catch (error) {
+      console.warn('⚠️ Batch syntax update failed:', error);
+    }
     
     // Notify user that variables are converted to development-friendly format
     figma.notify(`✅ ${cssVariables.length} variables converted to development-friendly format`);
