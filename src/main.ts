@@ -12,7 +12,18 @@ import { pushToGitHub } from './github-service';
  * 
  * @returns Promise that resolves when the conversion and upload is complete
  */
+// Global flag to prevent multiple executions
+let isRunning = false;
+
 export async function convertVariablesToCSS(): Promise<void> {
+  // Prevent multiple simultaneous executions
+  if (isRunning) {
+    console.log('⚠️ Plugin already running, ignoring duplicate call');
+    return;
+  }
+  
+  isRunning = true;
+  
   try {
     const collections: VariableCollection[] = await figma.variables.getLocalVariableCollectionsAsync();
     
@@ -49,9 +60,6 @@ export async function convertVariablesToCSS(): Promise<void> {
               type: variable.resolvedType.toLowerCase()
             });
             
-            // Set the variable code syntax for Figma web devmode display
-            variable.setVariableCodeSyntax('WEB', `var(${cssVariableName})`);
-            
             console.log(`✅ ${cssVariableName}: ${cssValue}`);
           } else {
             console.warn(`⚠️ Could not generate CSS value for ${variable.name}`);
@@ -69,6 +77,9 @@ export async function convertVariablesToCSS(): Promise<void> {
     }
     
     console.log(`📝 Generated ${cssVariables.length} CSS variables`);
+    
+    // TODO: Re-enable setVariableCodeSyntax after fixing infinite loop
+    // console.log('✅ Skipping Figma web devmode syntax update to prevent infinite loop');
     
     // Notify user that variables are converted to development-friendly format
     figma.notify(`✅ ${cssVariables.length} variables converted to development-friendly format`);
@@ -97,6 +108,8 @@ export async function convertVariablesToCSS(): Promise<void> {
   } catch (error) {
     console.error("Error in main function:", error);
     figma.notify(`❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+  } finally {
+    isRunning = false;
   }
   
   figma.closePlugin();

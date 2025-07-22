@@ -1,50 +1,101 @@
 # Figma CSS Variables Converter
 
-A Figma plugin that converts Figma variables to CSS custom properties and automatically pushes them to a GitHub repository.
+A Figma plugin that converts Figma variables to development-friendly CSS custom properties and automatically pushes them to a GitHub repository.
+
+## Core Functionality
+
+### 1. 🎯 **Figma Dev Mode Integration**
+
+The plugin updates Figma's web/devmode to display properly formatted CSS variable names:
+
+- **Before:** Generic variable display
+- **After:** Shows `var(--color_btn-bg)`, `var(--space_btn-pad-inline)` format
+- **Benefit:** Developers see the exact CSS variable names they need to use in their code
+
+### 2. 📤 **GitHub CSS Export**
+
+Automatically generates and exports a complete CSS file to your GitHub repository:
+
+- **Format:** Modern CSS custom properties with semantic naming
+- **Output:** Clean, organized CSS file with proper grouping and comments
+- **Integration:** Direct push to specified GitHub repo/branch/file
 
 ## Features
 
-- 🎨 Converts Figma variables to CSS custom properties
-- 🔄 Automatically detects variable types (colors, spacing, sizing, etc.)
-- 📤 Pushes generated CSS directly to GitHub
-- 🏗️ Modular TypeScript architecture
-- 🔧 Configurable GitHub integration
+- 🎨 **Modern CSS Format:** HSL colors (`hsl(0 100% 50%)`) with decimal alpha (`hsl(0 100% 50% / .5)`)
+- 📏 **Rem Units:** All sizes converted to rem units (16px base: `1rem`, `0.5rem`, etc.)
+- 🏷️ **Smart Naming:** Semantic variable names with type prefixes (`--color_btn-bg`, `--space_btn-pad-inline`)
+- 🔄 **Auto Type Detection:** Detects spacing, sizing, colors, border-radius, opacity, fonts, etc.
+- 🎭 **CamelCase Conversion:** Converts `btnBg` to `btn-bg` for consistent naming
+- 📤 **GitHub Integration:** Direct push to repository with commit messages
+- 🏗️ **Clean Architecture:** Modular TypeScript with lambda functions
+- 🔧 **Secure Configuration:** JSON-based config with token management
+
+## Example Output
+
+### Generated CSS Format:
+
+```css
+:root {
+  /* Color Variables */
+  --color_btn-bg: hsl(0 100% 50%);
+  --color_btn-text: hsl(0 0% 100%);
+  --color_primary: hsl(220 100% 50% / 0.9);
+
+  /* Space Variables */
+  --space_btn-pad-inline: 1rem;
+  --space_btn-pad-block: 0.5rem;
+  --space_container-gap: 1.5rem;
+
+  /* Radius Variables */
+  --radius_btn-radius: 0.25rem;
+  --radius_card-radius: 0.5rem;
+
+  /* Size Variables */
+  --size_btn-height: 2.5rem;
+  --size_icon-size: 1.5rem;
+}
+```
+
+### Figma Dev Mode Display:
+
+- **btnBg** → `var(--color_btn-bg)`
+- **btnPadInline** → `var(--space_btn-pad-inline)`
+- **btnRadius** → `var(--radius_btn-radius)`
 
 ## Source Code Structure
 
-The plugin uses a modular architecture with the following structure:
-
-## File Structure
-
-### `config.ts`
-- **Purpose**: Configuration constants and interfaces
-- **Contents**: GitHub repository settings, API endpoints
-- **Key exports**: `GITHUB_CONFIG`, `GitHubConfig` interface
+The plugin uses a modular architecture with lambda functions and clean separation of concerns:
 
 ### `utils.ts`
-- **Purpose**: Utility functions used across the plugin
-- **Contents**: Base64 encoding, color conversion, string manipulation
-- **Key exports**: `base64Encode()`, `figmaColorToCSS()`, `cleanVariableName()`
+
+- **HSL Color Conversion:** `rgbToHsl()`, `rgbaToHsl()` with decimal alpha
+- **Unit Conversion:** `pxToRem()` for consistent rem units
+- **GitHub Integration:** `base64Encode()` for API compatibility
 
 ### `variable-detectors.ts`
-- **Purpose**: Functions to detect variable types based on naming patterns
-- **Contents**: Pattern matching functions for different CSS property types
-- **Key exports**: `isSpacingVariable()`, `isSizingVariable()`, `isOpacityVariable()`, etc.
+
+- **Smart Type Detection:** Lambda functions for detecting variable purposes
+- **Semantic Naming:** `generateCSSVariableName()` with camelCase conversion
+- **Type Mapping:** Clean prefix mapping for CSS variable categories
 
 ### `css-generator.ts`
-- **Purpose**: CSS generation logic for Figma variables
-- **Contents**: Variable processing, CSS naming, output generation
-- **Key exports**: `generateCSSVariableName()`, `processVariable()`, `generateCSSOutput()`
+
+- **Value Conversion:** Type-specific CSS value generation
+- **Output Formatting:** Organized CSS with proper grouping and comments
+- **Modern Syntax:** HSL colors, rem units, decimal alpha support
 
 ### `github-service.ts`
-- **Purpose**: GitHub API integration
-- **Contents**: File upload, repository interaction, error handling
-- **Key exports**: `pushToGitHub()`, `getCurrentFile()`, `isGitHubTokenConfigured()`
+
+- **Repository Integration:** File upload with conflict resolution
+- **Error Handling:** Comprehensive API error management
+- **Security:** Token masking and secure authentication
 
 ### `main.ts`
-- **Purpose**: Main orchestration logic
-- **Contents**: Plugin workflow coordination
-- **Key exports**: `convertAndExportToGitHub()`
+
+- **Workflow Orchestration:** Complete plugin lifecycle management
+- **Figma Integration:** Dev mode syntax updates with `setVariableCodeSyntax()`
+- **User Feedback:** Progressive notifications for better UX
 
 ## Configuration
 
@@ -53,11 +104,13 @@ The plugin uses a JSON-based configuration system for better security and mainta
 ### Setup Instructions
 
 1. **Create your config file**: Copy `config.example.json` to `config.json`:
+
    ```bash
    cp config.example.json config.json
    ```
 
 2. **GitHub Token**: Create a personal access token at [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+
    - Select "Generate new token (classic)"
    - Give it a descriptive name like "Figma Variables Plugin"
    - Select the `repo` scope for repository access
@@ -69,7 +122,7 @@ The plugin uses a JSON-based configuration system for better security and mainta
      "github": {
        "owner": "your-github-username",
        "repo": "your-repository-name",
-       "path": "variables.css",
+       "path": "your-file-path.css",
        "branch": "main",
        "token": "your-github-token-here"
      }
@@ -129,6 +182,25 @@ src/
 4. Use `npm run watch` for continuous development
 5. Use `npm run clean` to remove generated files when needed
 
+## Variable Format Examples
+
+| Figma Variable    | CSS Variable Name              | CSS Value Example   |
+| ----------------- | ------------------------------ | ------------------- |
+| `btnBg`           | `--color_btn-bg`               | `hsl(220 100% 50%)` |
+| `btnText`         | `--color_btn-text`             | `hsl(0 0% 100%)`    |
+| `btnPadInline`    | `--space_btn-pad-inline`       | `1rem`              |
+| `btnPadBlock`     | `--space_btn-pad-block`        | `0.5rem`            |
+| `btnRadius`       | `--radius_btn-radius`          | `0.25rem`           |
+| `primaryOpacity`  | `--opacity_primary-opacity`    | `0.9`               |
+| `shadowElevation` | `--elevation_shadow-elevation` | `0.5rem`            |
+
+## Usage Notifications
+
+When the plugin runs, you'll see two notifications:
+
+1. **"✅ X variables converted to development-friendly format"** - Figma dev mode updated
+2. **"✅ Success! X variables pushed to GitHub"** - CSS file exported to repository
+
 ## Development
 
 ### Building the Plugin
@@ -149,6 +221,15 @@ npm run lint:fix
 ```bash
 npm run watch
 ```
+
+## Technical Highlights
+
+- **Lambda Functions:** Clean, functional programming approach
+- **Type Safety:** Comprehensive TypeScript interfaces
+- **Single Bundle:** 19KB optimized output for Figma
+- **Modern CSS:** HSL colors, rem units, semantic naming
+- **Error Handling:** Robust error management and user feedback
+- **Security:** Secure token handling and Git integration
 
 ## License
 
