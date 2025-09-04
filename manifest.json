@@ -23,5 +23,8 @@
     "allowedDomains": [
       "https://api.github.com"
     ]
-  }
+  },
+  "permissions": [
+    "currentuser"
+  ]
 }

@@ -11,11 +11,14 @@ declare global {
   };
 
   /** Fetch API available in Figma plugin environment */
-  function fetch(input: string, init?: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-  }): Promise<{
+  function fetch(
+    input: string,
+    init?: {
+      method?: string;
+      headers?: Record<string, string>;
+      body?: string;
+    }
+  ): Promise<{
     ok: boolean;
     status: number;
     statusText: string;
@@ -33,7 +36,7 @@ declare global {
   interface Variable {
     id: string;
     name: string;
-    resolvedType: 'COLOR' | 'FLOAT' | 'STRING' | 'BOOLEAN';
+    resolvedType: "COLOR" | "FLOAT" | "STRING" | "BOOLEAN";
     valuesByMode: { [modeId: string]: RGB | RGBA | number | string | boolean };
     setVariableCodeSyntax(platform: string, syntax: string): void;
   }
@@ -65,13 +68,16 @@ declare global {
       postMessage(message: any): void;
       onmessage: ((message: any) => void) | null;
     };
-    notify(message: string): void;
+    notify(message: string, options?: { error?: boolean }): void;
     closePlugin(): void;
-    showUI(html: string, options?: {
-      width?: number;
-      height?: number;
-      themeColors?: boolean;
-    }): void;
+    showUI(
+      html: string,
+      options?: {
+        width?: number;
+        height?: number;
+        themeColors?: boolean;
+      }
+    ): void;
   };
 
   /** Global variable containing the UI HTML */
